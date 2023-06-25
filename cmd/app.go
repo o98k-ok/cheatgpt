@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -32,14 +33,21 @@ func Entry() {
 		}
 
 		content := strings.Join(s, " ")
-
 		start := time.Now().UnixMilli()
-		result, err := gpt.Ask(core.NewRequest([]entity.Message{
+		req := core.NewRequest([]entity.Message{
 			{
 				Role:    "assistant",
 				Content: content,
 			},
-		}))
+		})
+
+		if v, ok := envs[entity.MAX_TOKEN]; ok {
+			tk, err := strconv.Atoi(v)
+			if err == nil {
+				req.MaxTokens = tk
+			}
+		}
+		result, err := gpt.Ask(req)
 
 		cost := time.Now().UnixMilli() - start
 		if err != nil {
@@ -47,7 +55,7 @@ func Entry() {
 			return
 		}
 
-		finialResult := fmt.Sprintf("# %s:\n%s\n\n", time.Now().Format("2006-01-02 15:01:01"), result.Choices[0].Message.Content)
+		finialResult := fmt.Sprintf("# %s:\nQ:%s?\n%s\n\n", time.Now().Format("2006-01-02 15:01:01"), content, result.Choices[0].Message.Content)
 		items := alfred.NewItems()
 		items.Append(alfred.NewItem("问题描述", content, finialResult))
 		items.Append(alfred.NewItem("AI答复", result.Choices[0].Message.Content, finialResult))

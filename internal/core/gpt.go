@@ -12,7 +12,7 @@ import (
 
 var (
 	DefaultModel    string = "gpt-3.5-turbo"
-	DefaultMaxToken int    = 300
+	DefaultMaxToken int    = 2048
 	DefaultHost     string = "https://api.openai.com/v1"
 )
 
